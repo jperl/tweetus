@@ -1,4 +1,4 @@
- //CodePen Evaluation License 
+//CodePen Evaluation License
 //
 //Copyright (c) 2013 Famo.us, Inc.
 //
@@ -19,33 +19,33 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Famous(function(require) {
+Famous.loaded(function (require) {
     // import dependencies
     var FamousEngine = require('famous/Engine');
     var FastClick = require('famous-sync/FastClick');
-    
+
     var Scrollview = require('famous-views/Scrollview');
     var ViewSequence = require('famous/ViewSequence');
     var Surface = require('famous/Surface');
-    
+
     var View = require('famous/View');
     var EventHandler = require('famous/EventHandler');
     var OptionsManager = require('famous/OptionsManager');
     var RenderNode = require('famous/RenderNode');
     var Utility = require('famous/Utility');
-    
+
     var HeaderFooterLayout = require('famous-views/HeaderFooterLayout');
     var EdgeSwapper = require('famous-views/EdgeSwapper');
-    
+
     var NavigationBar = require('famous-widgets/NavigationBar');
-    var TitleBar = require('famous-widgets/TitleBar');
-    
+    var TitleBar = Famous.TitleBar;
+
     function App(options) {
         // extend from view
         View.apply(this, arguments);
 
         // create the layout
-        this.layout = new HeaderFooterLayout();
+        this.layout = new Famous.HeaderFooterLayout();
 
         // create the header
         this.header = new TitleBar(this.options.header);
@@ -73,7 +73,7 @@ Famous(function(require) {
         this._sectionTitles = {};
 
         // respond to the the selection of a different section
-        this.navigation.on('select', function(data) {
+        this.navigation.on('select', function (data) {
             this._currentSection = data.id;
             this.header.show(this._sectionTitles[data.id]);
             this.contentArea.show(this._sections[data.id].get());
@@ -82,10 +82,10 @@ Famous(function(require) {
         // assign the layout to this view
         this._link(this.layout);
     }
-    ;
+
     App.prototype = Object.create(View.prototype);
     App.prototype.constructor = App;
-    
+
     App.DEFAULT_OPTIONS = {
         header: {
             size: [undefined, 50],
@@ -109,18 +109,18 @@ Famous(function(require) {
             overlap: true
         }
     };
-    
-    App.prototype.getState = function() {
+
+    App.prototype.getState = function () {
         return this._currentSection;
     };
-    
-    App.prototype.section = function(id) {
+
+    App.prototype.section = function (id) {
         // create the section if it doesn't exist
         if (!(id in this._sections)) {
             this._sections[id] = new RenderNode();
 
             // make it possible to set the section's properties
-            this._sections[id].setOptions = (function(options) {
+            this._sections[id].setOptions = (function (options) {
                 this._sectionTitles[id] = options.title;
                 this.navigation.defineSection(id, {
                     content: '<span class="icon">' + options.navigation.icon + '</span><br />' + options.navigation.caption
@@ -129,98 +129,97 @@ Famous(function(require) {
         }
         return this._sections[id];
     };
-    
-    App.prototype.select = function(id) {
+
+    App.prototype.select = function (id) {
         this._currentSection = id;
         if (!(id in this._sections))
             return false;
         this.navigation.select(id);
         return true;
     };
-    
+
     var FeedItem = require('famous-widgets/FeedItem');
     var Transitionable = require('famous/Transitionable');
     var OptionsManager = require('famous/OptionsManager');
     var Matrix = require('famous/Matrix');
-    
+
     var userInfoFirebase = null;
     var userInfo = {};
-    
+
     function SparkItem(options) {
         FeedItem.apply(this, arguments);
         if (options)
             this.setOptions(options);
-        
+
         this.inState = new Transitionable(0);
         this.inState.set(1, this.options.inTransition);
     }
-    ;
-    
+
     SparkItem.prototype = Object.create(FeedItem.prototype);
     SparkItem.prototype.constructor = SparkItem;
-    
+
     SparkItem.DEFAULT_OPTIONS = OptionsManager.patch(FeedItem.DEFAULT_OPTIONS, {
         classes: ['tweet'],
         size: [undefined, 80],
-        inTransition: {curve: 'easeOut',duration: 500}
+        inTransition: {curve: 'easeOut', duration: 500}
     });
-    
-    SparkItem.setFirebase = function(firebase) {
+
+    SparkItem.setFirebase = function (firebase) {
         userInfoFirebase = firebase;
     };
-    
-    SparkItem.prototype.render = function(input) {
+
+    SparkItem.prototype.render = function (input) {
         var result = FeedItem.prototype.render.apply(this, arguments);
         if (!this.inState.isActive())
             return result;
         else
-            return {opacity: this.inState.get(),target: result};
+            return {opacity: this.inState.get(), target: result};
     };
-    
-    SparkItem.prototype.setContent = function(content) {
+
+    SparkItem.prototype.setContent = function (content) {
         var userId = content['author'];
         var iconUrl = 'content/default-pic.gif';
         if (userId in userInfo) {
             iconUrl = userInfo[userId]['pic'];
-        } 
+        }
         else {
             var userRef = userInfoFirebase.child('people').child(userId);
-            userRef.on('value', function(dataSnapshot) {
+            userRef.on('value', function (dataSnapshot) {
                 userInfo[userId] = dataSnapshot.val();
                 if (userInfo[userId]['pic'])
                     this.setContent(content);
             }.bind(this));
         }
-        
-        var feedContent = {icon: iconUrl,source: content['by'],time: content['timestamp'],text: content['content']};
+
+        var feedContent = {icon: iconUrl, source: content['by'], time: content['timestamp'], text: content['content']};
         return FeedItem.prototype.setContent.call(this, feedContent);
     };
 
     // define the options
     var headerOptions = {
         look: {classes: ['header']},
-        inTransition: {curve: 'easeOutBounce',duration: 375},
-        outTransition: {curve: 'easeIn',duration: 225},
+        inTransition: {curve: 'easeOutBounce', duration: 375},
+        outTransition: {curve: 'easeIn', duration: 225},
         overlap: false
     };
-    
+
     var navigationOptions = {
         buttons: {
             onClasses: ['navigation', 'on'],
             offClasses: ['navigation', 'off'],
-            inTransition: {curve: 'easeInOut',duration: 150},
-            outTransition: {curve: 'easeInOut',duration: 150}
+            inTransition: {curve: 'easeInOut', duration: 150},
+            outTransition: {curve: 'easeInOut', duration: 150}
         }
     };
-    
+
     var contentOptions = {
-        inTransition: {curve: 'easeOutBounce',duration: 500},
+        inTransition: {curve: 'easeOutBounce', duration: 500},
         outTransition: {duration: 300},
         overlap: true
     };
 
     // create the App from the template and hook it into the context
-    var myApp = new App({header: headerOptions,navigation: navigationOptions,content: contentOptions});
+    var myApp = new App({header: headerOptions, navigation: navigationOptions, content: contentOptions});
     var mainDisplay = FamousEngine.createContext();
     mainDisplay.link(myApp);
     FamousEngine.pipe(myApp);
@@ -233,7 +232,7 @@ Famous(function(require) {
     var homeSection = myApp.section('home');
     homeSection.setOptions({
         title: '<span class="bird">&#62217;</span>',
-        navigation: {caption: 'Home',icon: '<span class="entypo">&#8962;</span>'}
+        navigation: {caption: 'Home', icon: '<span class="entypo">&#8962;</span>'}
     });
     var homeItems = new ViewSequence();
     var homeScroll = new Scrollview();
@@ -243,7 +242,7 @@ Famous(function(require) {
     var connectSection = myApp.section('connect');
     connectSection.setOptions({
         title: 'Connect',
-        navigation: {caption: 'Connect',icon: '@'}
+        navigation: {caption: 'Connect', icon: '@'}
     });
     var connectItems = new ViewSequence();
     var connectScroll = new Scrollview();
@@ -253,7 +252,7 @@ Famous(function(require) {
     var discoverSection = myApp.section('discover');
     discoverSection.setOptions({
         title: 'Discover',
-        navigation: {caption: 'Discover',icon: '#'}
+        navigation: {caption: 'Discover', icon: '#'}
     });
     var discoverItems = new ViewSequence();
     var discoverScroll = new Scrollview();
@@ -263,7 +262,7 @@ Famous(function(require) {
     var meSection = myApp.section('me');
     meSection.setOptions({
         title: 'Me',
-        navigation: {caption: 'Me',icon: '<span class="entypo">&#128100;</span>'}
+        navigation: {caption: 'Me', icon: '<span class="entypo">&#128100;</span>'}
     });
     // stubbed default to Mark for demo purposes
     var myAuth = {
@@ -285,7 +284,7 @@ Famous(function(require) {
     var sparks = firebase.child('sparks');
 
     // display the scrollviews when loaded
-    sparks.once('value', function() {
+    sparks.once('value', function () {
         // rewind the pointers
         while (homeItems.getPrevious())
             homeItems = homeItems.getPrevious();
@@ -305,7 +304,7 @@ Famous(function(require) {
 
     // update the scrollviews with data as they come in
     var recentTimestampLimit = Date.now() - 90 * 86400000; // limit to 90 days
-    sparks.on('child_added', function(snapshot) {
+    sparks.on('child_added', function (snapshot) {
         var value = snapshot.val();
         if (value['timestamp'] > recentTimestampLimit) {
             homeItems.unshift(new SparkItem({content: value}));
@@ -332,7 +331,7 @@ Famous(function(require) {
     var Modifier = require('famous/Modifier');
     var Matrix = require('famous/Matrix');
     var signupContext = FamousEngine.createContext();
-    signupContext.link(new Modifier({origin: [0, 0],transform: Matrix.translate(10, 10),opacity: 0.7})).link(new Surface({
+    signupContext.link(new Modifier({origin: [0, 0], transform: Matrix.translate(10, 10), opacity: 0.7})).link(new Surface({
         size: [true, true],
         classes: ['signup'],
         content: '<a href="http://demo.famo.us/signup">sign up</a>'
