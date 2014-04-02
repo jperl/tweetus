@@ -22,21 +22,21 @@ Famous.loaded(function (require) {
         look: undefined
     };
 
-    TitleBar.prototype.show = function (index) {
+    TitleBar.prototype.show = function (content) {
         var widget = this.options.widget;
-        if (!(index in this._surfaces)) {
+        if (!(content in this._surfaces)) {
             var surface = new widget({
                 size: this.options.size
             });
             surface.setOptions(this.options.look);
-            surface.setContent(index);
-            this._surfaces[index] = surface;
+            surface.setContent(content);
+            this._surfaces[content] = surface;
         }
-        this.lightbox.show(this._surfaces[index]);
+        this.lightbox.show(this._surfaces[content]);
     };
 
     TitleBar.prototype.getSize = function () {
-        return this.options.size
+        return this.options.size;
     };
 
     TitleBar.prototype.setOptions = function (options) {

@@ -138,7 +138,7 @@ Famous.loaded(function (require) {
         return true;
     };
 
-    var FeedItem = require('famous-widgets/FeedItem');
+    var FeedItem = Famous.FeedItem;
     var Transitionable = require('famous/Transitionable');
     var OptionsManager = require('famous/OptionsManager');
     var Matrix = require('famous/Matrix');
