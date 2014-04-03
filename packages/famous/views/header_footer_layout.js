@@ -37,7 +37,7 @@ Famous.loaded(function (require) {
         }
     };
 
-    HeaderFooterLayout.prototype.commit = function (t, transform, opacity, origin, size) {
+    HeaderFooterLayout.prototype.commit = function (context, transform, opacity, origin, size) {
         function getWidthOrHeight(headerOrFooter, defaultSize) {
             var node = headerOrFooter.get();
             if (!node || !node.getSize)
@@ -51,8 +51,8 @@ Famous.loaded(function (require) {
             return this.options.direction == HeaderFooterLayout.DIRECTION_X ? Matrix.translate(size, 0, 0) : Matrix.translate(0, size, 0)
         }
 
-        function getSize(t) {
-            return this.options.direction == HeaderFooterLayout.DIRECTION_X ? [t, size[1]] : [size[0], t]
+        function getSize(relevantDimensionSize) {
+            return this.options.direction == HeaderFooterLayout.DIRECTION_X ? [relevantDimensionSize, size[1]] : [size[0], relevantDimensionSize]
         }
 
         var headerWidthOrHeight = getWidthOrHeight.call(this, this._header, this.options.headerSize),
