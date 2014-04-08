@@ -47,13 +47,13 @@ Famous.loaded(function (require) {
         void 0 !== options.overlap && (this.options.overlap = options.overlap);
     };
 
-    LightBox.prototype.show = function (surface, i, callback) {
+    LightBox.prototype.show = function (surface, i, onComplete) {
         if (!surface)
-            return this.hide(callback);
+            return this.hide(onComplete);
 
-        if (i instanceof Function && (callback = i, i = void 0), this._showing) {
+        if (i instanceof Function && (onComplete = i, i = void 0), this._showing) {
             if (!this.options.overlap)
-                return this.hide(this.show.bind(this, surface, callback)), void 0;
+                return this.hide(this.show.bind(this, surface, onComplete)), void 0;
             this.hide()
         }
 
@@ -69,17 +69,17 @@ Famous.loaded(function (require) {
         this.nodes.push(modifierNode);
         this.transforms.push(modifier);
 
-        var h = callback ? Utility.after(3, callback) : void 0;
+        var after = onComplete ? Utility.after(3, onComplete) : void 0;
         i || (i = this.options.inTransition);
-        modifier.setTransform(this.options.showTransform, i, h);
-        modifier.setOpacity(this.options.showOpacity, i, h);
-        modifier.setOrigin(this.options.showOrigin, i, h);
+        modifier.setTransform(this.options.showTransform, i, after);
+        modifier.setOpacity(this.options.showOpacity, i, after);
+        modifier.setOrigin(this.options.showOrigin, i, after);
     };
 
-    LightBox.prototype.hide = function (transform, onComplete) {
+    LightBox.prototype.hide = function (outTransform, onComplete) {
         if (this._showing) {
             this._showing = !1;
-            transform instanceof Function && (onComplete = transform, transform = void 0);
+            outTransform instanceof Function && (onComplete = outTransform, outTransform = void 0);
 
             var node = this.nodes[this.nodes.length - 1];
             var transform = this.transforms[this.transforms.length - 1];
@@ -89,10 +89,10 @@ Famous.loaded(function (require) {
                 onComplete && onComplete.call(this);
             }.bind(this));
 
-            transform || (transform = this.options.outTransition);
-            transform.setTransform(this.options.outTransform, transform, after);
-            transform.setOpacity(this.options.outOpacity, transform, after);
-            transform.setOrigin(this.options.outOrigin, transform, after);
+            outTransform || (outTransform = this.options.outTransition);
+            transform.setTransform(this.options.outTransform, outTransform, after);
+            transform.setOpacity(this.options.outOpacity, outTransform, after);
+            transform.setOrigin(this.options.outOrigin, outTransform, after);
         }
     };
 
